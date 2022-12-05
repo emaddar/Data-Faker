@@ -6,16 +6,14 @@ from pickle import TRUE
 #from tkinter import CENTER
 import pandas as pd
 from faker import Faker
-from faker.providers import internet
 import streamlit as st
 import numpy as np
 import random
 import io
 from datetime import datetime
 import matplotlib.pyplot as plt
-import plotly_express as px
-
-
+import random
+import ast
 
 
 
@@ -89,8 +87,19 @@ proba_M = st.sidebar.slider('Male Probability : ',0.0,1.0 , 0.5)
 st.sidebar.write("Female Probability :", round(1-proba_M,2))
 
 
+st.sidebar.markdown('---')
+custom = st.sidebar.checkbox('Add custom columns', value=Select_ALL)
 
-if Select_ALL or ID or Gender or First_name or Last_name or address or phone_number or Blood_Type or Job or email or dob or SSN or note:
+
+
+
+
+
+
+
+
+
+if Select_ALL or ID or Gender or First_name or Last_name or address or phone_number or Blood_Type or Job or email or dob or SSN or note or custom :
     #st.sidebar.markdown('---')
 
 
@@ -119,13 +128,13 @@ if Select_ALL or ID or Gender or First_name or Last_name or address or phone_num
         if phone_number: customers[i]['phone_number'] = fake.phone_number()
         if email:
             if First_name and Last_name:
-                customers[i]['email'] = f"{customers[i]['First_name']}.{customers[i]['Last_name']}@{fake.company_email()}.com" 
+                customers[i]['email'] = f"{customers[i]['First_name']}.{customers[i]['Last_name']}@{fake.domain_name()}" 
             elif First_name:
-                customers[i]['email'] = f"{customers[i]['First_name']}.{fake.random_int(1,546)}@{fake.company_email()}.com" 
+                customers[i]['email'] = f"{customers[i]['First_name']}.{fake.random_int(1,546)}@{fake.domain_name()}" 
             elif Last_name:
-                customers[i]['email'] = f"{customers[i]['Last_name']}.{fake.random_int(1,546)}@{fake.company_email()}.com" 
+                customers[i]['email'] = f"{customers[i]['Last_name']}.{fake.random_int(1,546)}@{fake.domain_name()}" 
             else :
-                customers[i]['email'] = fake.company_email()
+                customers[i]['email'] = fake.free_email()
         
         if Blood_Type : 
             random_blood_type = random.choices(Blood_list, weights =(30,30,30,30,30,5,30,30 ) )
@@ -151,12 +160,95 @@ if Select_ALL or ID or Gender or First_name or Last_name or address or phone_num
         if Select_ALL: customers[i]['id'] = i+1
 
 
+
+
+    
+
     df = pd.DataFrame(customers).T
+    
+
+
+
+
+    if custom :
+        
+            new_columns = st.sidebar.number_input('Number of new columns :',min_value=1, max_value=30, step=1, value=1)
+            for j in range(new_columns):
+                
+                form_expander = st.sidebar.expander(label=f'➕ Additionals collumn {j+1}')
+                with form_expander:
+                    form_expander.success(f'New column {j+1}', icon="✅")
+                    mylist = []
+                    column_name = form_expander.text_input(f"Column name :", key = j)
+                    column_type = form_expander.selectbox('Choose one or more locales',("float", "int", "str", "bool","date"), key = j+30)
+                    if column_type == "float":
+                            from_st = form_expander.number_input('From : ', value=0, key=f"f{j}")
+                            to_st = form_expander.number_input('To : ', value=10, key=f"f{j+30}")
+                            for i in range(0, int(intput_val)):
+                                mylist.append(random.uniform(from_st, to_st))
+                    elif column_type == 'int' :
+                            from_st = form_expander.number_input('From : ', value=0, key=f"ff{j}")
+                            to_st = form_expander.number_input('To : ', value=10, key=f"ff{j+30}")
+                            for i in range(0, int(intput_val)):
+                                mylist.append(random.randint(from_st, to_st))
+                    elif column_type == 'str':
+                        str_list = form_expander.text_input(f"List of str (ex : ['France', 'Germany', ...]) :", key = f"ffff{j*30}", value= "['France', 'Germany']")
+                        str_list = ast.literal_eval(str_list)
+                        for i in range(0, int(intput_val)):
+                                mylist.append(random.choice(str_list))
+                    elif column_type == "date":
+                        from_st = form_expander.date_input('From date: ', key=f"dd{j}")
+                        to_st = form_expander.date_input('To date: ', key=f"dd{j+30}")
+                        for i in range(0, int(intput_val)):
+                            mylist.append(fake.date_between(start_date = from_st, end_date = to_st))
+                    elif column_type == 'bool':
+                        for i in range(0, int(intput_val)):
+                                mylist.append(random.choice([True, False]))
+                    
+                    if column_name != "" and column_type != "":
+                        df[column_name] = mylist
+        
+            for k in range(3):
+                st.sidebar.write("")
+
+
+                    
+            
+
+
+
+
+
 
 
     st.markdown("<h4 style='text-align: left; color: black;'>  Data preview </h4>", unsafe_allow_html=True)
 
     st.dataframe(df)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     col1, col2, col3 , col4, col5= st.columns(5)
