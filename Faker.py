@@ -177,7 +177,7 @@ if Select_ALL or ID or Gender or First_name or Last_name or address or phone_num
                 
                 form_expander = st.sidebar.expander(label=f'➕ Additionals collumn {j+1}')
                 with form_expander:
-                    form_expander.success(f'New column {j+1}', icon="✅")
+                    form_expander.success(f'✅ New column {j+1}')
                     mylist = []
                     column_name = form_expander.text_input(f"Column name :", key = j)
                     column_type = form_expander.selectbox('Choose one or more locales',("float", "int", "str", "bool","date"), key = j+30)
